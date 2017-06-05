@@ -6,7 +6,7 @@
 
 QT       += core gui
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = BlistCount
 TEMPLATE = app
@@ -24,8 +24,35 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    plot/qcustomplot.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    plot/qcustomplot.h
 
 FORMS    += mainwindow.ui
+
+
+INCLUDEPATH+=C:/Librarys/OpenCV2/include
+INCLUDEPATH+=C:/Librarys/OpenCV2/include/opencv
+
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_core320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_calib3d320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_objdetect320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_photo320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_shape320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_stitching320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_superres320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_videostab320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_features2d320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_flann320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_highgui320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_imgcodecs320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_imgproc320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_ml320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_imgproc320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_imgcodecs320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_video320.dll
+LIBS+=C:/Librarys/OpenCV2/dll/libopencv_videoio320.dll
+
+LIBS+=C:/Librarys/OpenCV2/dll/opencv_ffmpeg320.dll

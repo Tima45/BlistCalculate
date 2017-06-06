@@ -10,6 +10,8 @@
 #include <cv.hpp>
 #include <QTime>
 #include <QRegExp>
+#include "blistpicture.h"
+
 
 
 namespace Ui {
@@ -23,13 +25,14 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = 0);
-    void processPictures(QString path);
-    void calculateDifferense(QDir dir);
-    double calculateIntegralBright(Mat pic);
-    QFileInfo findFirstFile(QDir dir);
-
-    double diffPicPic(Mat pic1, Mat pic2);
     ~MainWindow();
+
+    void processPictures(QString path);
+    void loadBlistPictures(QDir dir);
+    void calculateDifferense();
+
+
+
     void initPlot();
     void drawDifference();
 private slots:
@@ -37,12 +40,13 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    QVector<BlistPicture*> blistPictures;
+
 
     QRegExp tampleFileName;
     Mat startPicture;
 
     QVector<double> pictureDifference;
-    QCPGraph *diffGraph;
 };
 
 #endif // MAINWINDOW_H

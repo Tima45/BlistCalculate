@@ -11,6 +11,8 @@
 #include <QTime>
 #include <QRegExp>
 #include "blistpicture.h"
+#include <QAxObject>
+#include <QThread>
 
 
 
@@ -30,13 +32,14 @@ public:
     void processPictures(QString path);
     void loadBlistPictures(QDir dir);
     void calculateDifferense();
-
-
+    void loadExels(QDir dir);
+    double calculateIncfluensTo(QTime time);
 
     void initPlot();
     void drawDifference();
 private slots:
     void on_selectFolderButton_clicked();
+
 
 private:
     Ui::MainWindow *ui;
@@ -47,6 +50,10 @@ private:
     Mat startPicture;
 
     QVector<double> pictureDifference;
+
+    QVector<QTime> times;
+    QVector<double> current;
+    QSharedPointer<QCPAxisTicker> standartTicker;
 };
 
 #endif // MAINWINDOW_H

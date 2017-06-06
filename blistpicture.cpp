@@ -77,6 +77,7 @@ void BlistPicture::calculateBrightness()
                    brightnessDifference += (a/255.0);
                }
             }
+
         }
     }
 }

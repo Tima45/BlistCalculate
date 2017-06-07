@@ -22,21 +22,7 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="2">
-     <widget class="QLabel" name="pathLabel">
-      <property name="text">
-       <string/>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QCheckBox" name="checkBox">
-      <property name="text">
-       <string>mAh</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="3">
+    <item row="0" column="4">
      <widget class="QProgressBar" name="progressBar">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
@@ -52,8 +38,29 @@
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="4">
+    <item row="0" column="2">
+     <widget class="QLabel" name="pathLabel">
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QCheckBox" name="checkBox">
+      <property name="text">
+       <string>mAh</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="5">
      <widget class="QCustomPlot" name="plot" native="true"/>
+    </item>
+    <item row="0" column="3">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Снимок</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

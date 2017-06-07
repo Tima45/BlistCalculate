@@ -41,6 +41,8 @@ private slots:
     void on_selectFolderButton_clicked();
 
 
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     QVector<BlistPicture*> blistPictures;

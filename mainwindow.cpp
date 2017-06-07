@@ -46,8 +46,8 @@ bool dereferencedLessThan(T * o1, T * o2) {
 void MainWindow::calculateDifferense()
 {
     if(!blistPictures.isEmpty()){
-        qSort(blistPictures.begin(),blistPictures.end(),dereferencedLessThan<BlistPicture>);
-        for(int i = 1; i < blistPictures.count(); i++){
+        std::sort(blistPictures.begin(),blistPictures.end(),dereferencedLessThan<BlistPicture>);
+        for(int i = 0; i < blistPictures.count(); i++){
             blistPictures.at(i)->startPicture = blistPictures[0];
             blistPictures.at(i)->calculateBrightness();
         }
@@ -60,36 +60,36 @@ void MainWindow::loadExels(QDir dir)
     QFileInfoList list = dir.entryInfoList();
     times.clear();
     current.clear();
+    double testmAh = 0;
     for(int i = list.count()-1; i >= 0 ; i--){
         if(list.at(i).fileName() != "." && list.at(i).fileName() != ".." && list.at(i).fileName().endsWith(".xls")){
+
             ui->progressBar->setValue(rand()%100);
-            QAxObject* excel = new QAxObject("Excel.Application", 0);
-            QAxObject* workbooks = excel->querySubObject("Workbooks");
-            QAxObject* workbook = workbooks->querySubObject("Open(const QString&)", list.at(i).filePath());
-            QAxObject* sheets = workbook->querySubObject("Worksheets");
-            QAxObject* sheet = sheets->querySubObject("Item(int)", 1);
 
-            QAxObject* usedRange = sheet->querySubObject("UsedRange");
-            QAxObject* rows = usedRange->querySubObject("Rows");
-            int countRows = rows->property("Count").toInt();
+            QFile f(list.at(i).filePath());
+            if(f.open(QIODevice::ReadOnly)){
 
-            for(int j = 1; j < countRows; j++){
-                QAxObject* cellTime = sheet->querySubObject("Cells(int,int)",j+1,1);
-                int time = (cellTime->property("Value").toDouble()*1440.0)*60*1000;
+                    QByteArray all = f.readAll();
+                    QByteArrayList lines = all.split(0x0d);
+                    for(int l = 0; l < lines.count(); l++){
+                        QByteArrayList cells = lines[l].split(0x09);
+                        if(cells.count() >= 17){
+                            double current1 = cells[17].toDouble();
+                            QByteArrayList timeList = cells[0].split(':');
+                            if(timeList.count() >= 3){
+                                QTime time(timeList[0].toDouble(),timeList[1].toDouble(),timeList[2].toDouble());
+                                if(current1 > 0){
+                                    current.append(current1);
+                                    times.append(time);
+
+                                }
+                            }
+                        }
+                    }
 
 
-                QAxObject* cellCurrent = sheet->querySubObject("Cells(int,int)",j+1,18);
-                double current1 = cellCurrent->property("Value").toDouble();
-                if(current1 > 100){
-                    current.append(current1);
-                    times.append(QTime::fromMSecsSinceStartOfDay(time));
-                }
+                    f.close();
             }
-            ui->progressBar->setValue(rand()%100);
-
-            workbook->dynamicCall("Close()");
-            excel->dynamicCall("Quit()");
-            excel->deleteLater();
         }
     }
 }
@@ -158,8 +158,8 @@ void MainWindow::drawDifference()
         }
         QCPGraph *diffGraph = ui->plot->addGraph();
         diffGraph->setPen(QPen(QColor(Qt::blue)));
-
         diffGraph->setData(x,y);
+
         ui->plot->rescaleAxes();
         ui->plot->replot();
         ui->progressBar->setValue(0);
@@ -179,4 +179,10 @@ void MainWindow::on_selectFolderButton_clicked()
 
         processPictures(path);
     }
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString s = QFileDialog::getSaveFileName(this,"Сохранить скриншот",ui->pathLabel->text(),"png");
+    ui->plot->grab().save(s+".png","png");
 }

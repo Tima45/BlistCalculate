@@ -3,15 +3,10 @@
 BlistPicture::BlistPicture(QFileInfo fileInfo, QObject *parent) : QObject(parent)
 {
     this->fileInfo = fileInfo;
-
-
-
     QRegExp tampleFileName("Image_0_*.jpg");
     tampleFileName.setPatternSyntax(QRegExp::Wildcard);
-
     if(tampleFileName.exactMatch(this->fileInfo.fileName())){
         pic = imread(this->fileInfo.filePath().toStdString(),0);
-
         QString fileName = this->fileInfo.fileName();
         fileName.chop(4);
         int toRemove = fileName.count() - 6;
@@ -69,7 +64,6 @@ void BlistPicture::calculateBrightness()
             Mat result;
 
             subtract(startPicture->pic,pic,result);
-
             brightnessDifference = 0;
             for(int i = 0;i < result.cols;i++){
                 for(int j = 0;j < result.rows;j++){
@@ -77,7 +71,6 @@ void BlistPicture::calculateBrightness()
                    brightnessDifference += (a/255.0);
                }
             }
-
         }
     }
 }

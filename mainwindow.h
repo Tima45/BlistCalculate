@@ -13,6 +13,7 @@
 #include "blistpicture.h"
 #include <QAxObject>
 #include <QThread>
+#include "loadingthread.h"
 
 
 
@@ -30,10 +31,9 @@ public:
     ~MainWindow();
 
     void processPictures(QString path);
-    void loadBlistPictures(QDir dir);
-    void calculateDifferense();
-    void loadExels(QDir dir);
+
     double calculateIncfluensTo(QTime time);
+    void deletePictures();
 
     void initPlot();
     void drawDifference();
@@ -41,20 +41,21 @@ private slots:
     void on_selectFolderButton_clicked();
 
 
+    void loadingStatusChanged(QString text);
+    void loadingEnded();
+
     void on_pushButton_clicked();
 
 private:
     Ui::MainWindow *ui;
+
     QVector<BlistPicture*> blistPictures;
-
-
-    QRegExp tampleFileName;
-    Mat startPicture;
-
-    QVector<double> pictureDifference;
-
     QVector<QTime> times;
     QVector<double> current;
+
+    LoadingThread *loadingThread = nullptr;
+
+    QRegExp tampleFileName;
     QSharedPointer<QCPAxisTicker> standartTicker;
 };
 

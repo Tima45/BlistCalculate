@@ -6,93 +6,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    tampleFileName = QRegExp("Image_0_*.jpg");
-    tampleFileName.setPatternSyntax(QRegExp::Wildcard);
     initPlot();
 }
 
 void MainWindow::processPictures(QString path)
 {
     QDir dir(path);
-    loadBlistPictures(dir);
-    if(ui->checkBox->isChecked()){
-        loadExels(dir);
-    }
-    calculateDifferense();
-
-    drawDifference();
+    Rect ROI(ui->xBox->value(),ui->yBox->value(),ui->wBox->value(),ui->hBox->value());
+    loadingThread = new LoadingThread(dir,&blistPictures,&times,&current,ROI,ui->checkBox->isChecked());
+    connect(loadingThread,SIGNAL(loadingStatus(QString)),this,SLOT(loadingStatusChanged(QString)));
+    connect(loadingThread,SIGNAL(finished()),this,SLOT(loadingEnded()));
+    connect(loadingThread,SIGNAL(setProgress(int)),ui->progressBar,SLOT(setValue(int)));
+    loadingThread->start();
 }
 
-void MainWindow::loadBlistPictures(QDir dir)
-{
-    for(int i = 0; i < blistPictures.count(); i++){
-        blistPictures.at(i)->deleteLater();
-    }
-    blistPictures.clear();
 
-    QFileInfoList list = dir.entryInfoList();
-    for(int i = 0; i < list.count(); i++){
-        if(list.at(i).fileName() != "." && list.at(i).fileName() != ".." && tampleFileName.exactMatch(list.at(i).fileName())){
-            BlistPicture *newBlistPicture = new BlistPicture(list.at(i));
-            blistPictures.append(newBlistPicture);
-        }
-    }
-
-}
-template<class T>
-bool dereferencedLessThan(T * o1, T * o2) {
-    return *o1 < *o2;
-}
-void MainWindow::calculateDifferense()
-{
-    if(!blistPictures.isEmpty()){
-        std::sort(blistPictures.begin(),blistPictures.end(),dereferencedLessThan<BlistPicture>);
-        for(int i = 0; i < blistPictures.count(); i++){
-            blistPictures.at(i)->startPicture = blistPictures[0];
-            blistPictures.at(i)->calculateBrightness();
-        }
-    }
-}
-
-void MainWindow::loadExels(QDir dir)
-{
-    dir.setSorting(QDir::Time);
-    QFileInfoList list = dir.entryInfoList();
-    times.clear();
-    current.clear();
-    double testmAh = 0;
-    for(int i = list.count()-1; i >= 0 ; i--){
-        if(list.at(i).fileName() != "." && list.at(i).fileName() != ".." && list.at(i).fileName().endsWith(".xls")){
-
-            ui->progressBar->setValue(rand()%100);
-
-            QFile f(list.at(i).filePath());
-            if(f.open(QIODevice::ReadOnly)){
-
-                    QByteArray all = f.readAll();
-                    QByteArrayList lines = all.split(0x0d);
-                    for(int l = 0; l < lines.count(); l++){
-                        QByteArrayList cells = lines[l].split(0x09);
-                        if(cells.count() >= 17){
-                            double current1 = cells[17].toDouble();
-                            QByteArrayList timeList = cells[0].split(':');
-                            if(timeList.count() >= 3){
-                                QTime time(timeList[0].toDouble(),timeList[1].toDouble(),timeList[2].toDouble());
-                                if(current1 > 0){
-                                    current.append(current1);
-                                    times.append(time);
-
-                                }
-                            }
-                        }
-                    }
-
-
-                    f.close();
-            }
-        }
-    }
-}
 
 double MainWindow::calculateIncfluensTo(QTime time)
 {
@@ -111,6 +39,16 @@ double MainWindow::calculateIncfluensTo(QTime time)
         mAh /= (3600*1000);
     }
     return mAh;
+}
+
+void MainWindow::deletePictures()
+{
+    ui->statusLabel->setText("Удаление картинок...");
+    for(int i = 0; i < blistPictures.count(); i++){
+        delete blistPictures[i];
+    }
+    blistPictures.clear();
+    ui->statusLabel->setText("");
 }
 
 
@@ -135,6 +73,7 @@ void MainWindow::initPlot()
 
 void MainWindow::drawDifference()
 {
+    ui->statusLabel->setText("Отрисовка...");
     if(!blistPictures.isEmpty()){
         QVector<double> y,x;
         for(int i = 0; i < blistPictures.count(); i++){
@@ -151,10 +90,10 @@ void MainWindow::drawDifference()
             QSharedPointer<QCPAxisTickerTime> timeTicker(new QCPAxisTickerTime);
             timeTicker->setTimeFormat("%h:%m:%s");
             ui->plot->xAxis->setTicker(timeTicker);
-            ui->plot->xAxis->setLabel("t");
+            ui->plot->xAxis->setLabel("Время");
         }else{
             ui->plot->xAxis->setTicker(standartTicker);
-            ui->plot->xAxis->setLabel("mAh");
+            ui->plot->xAxis->setLabel("Плотность тока(mA/h)");
         }
         QCPGraph *diffGraph = ui->plot->addGraph();
         diffGraph->setPen(QPen(QColor(Qt::blue)));
@@ -164,10 +103,6 @@ void MainWindow::drawDifference()
         ui->plot->replot();
         ui->progressBar->setValue(0);
 
-        for(int i = 0; i < blistPictures.count(); i++){
-            blistPictures.at(i)->deleteLater();
-        }
-        blistPictures.clear();
     }
 }
 
@@ -176,9 +111,20 @@ void MainWindow::on_selectFolderButton_clicked()
     QString path = QFileDialog::getExistingDirectory(this,"Выбрать папку",ui->pathLabel->text());
     ui->pathLabel->setText(path);
     if(path != ""){
-
         processPictures(path);
     }
+}
+
+void MainWindow::loadingStatusChanged(QString text)
+{
+    ui->statusLabel->setText(text);
+}
+
+void MainWindow::loadingEnded()
+{
+    drawDifference();
+    deletePictures();
+    loadingThread->deleteLater();
 }
 
 void MainWindow::on_pushButton_clicked()
